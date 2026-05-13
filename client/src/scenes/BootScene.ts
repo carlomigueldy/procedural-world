@@ -12,7 +12,6 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(16, 34, 4, 14);
       g.fillStyle(0x4a2a0a);
       g.fillRect(16, 34, 2, 14);
-
       g.fillStyle(0x1a4a1a);
       g.fillEllipse(18, 30, 32, 22);
       g.fillStyle(0x2d6a27);

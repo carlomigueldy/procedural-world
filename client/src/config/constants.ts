@@ -165,7 +165,6 @@ export function getSmoothTileColor(elevation: number, biome: Biome): number {
 
   return getTileColor(TileType.SNOW, biome);
 }
-
 export enum StructureType {
   TREE = 0,
   PINE = 1,

@@ -9,6 +9,7 @@ export class GameScene extends Phaser.Scene {
   private player!: Player;
   private chunkManager!: ChunkManager;
   private minimap!: Minimap;
+  private uiCamera!: Phaser.Cameras.Scene2D.Camera;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd!: {
     W: Phaser.Input.Keyboard.Key;
@@ -25,11 +26,17 @@ export class GameScene extends Phaser.Scene {
   create(data?: { characterId?: number }): void {
     const characterId = data?.characterId ?? 0;
 
+    this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height);
+    this.uiCamera.setZoom(1);
+
     const generator = new TerrainGenerator(SEED);
-    this.chunkManager = new ChunkManager(this, generator);
+    this.chunkManager = new ChunkManager(this, generator, this.uiCamera);
     this.minimap = new Minimap(this, generator);
 
     this.player = new Player(this, 0, 0, characterId);
+
+    this.uiCamera.ignore(this.player.sprite);
+    this.cameras.main.ignore(this.minimap.getContainer());
 
     this.cameras.main.setBounds(-100000, -100000, 200000, 200000);
     this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
@@ -48,10 +55,10 @@ export class GameScene extends Phaser.Scene {
       this.currentZoom = Phaser.Math.Clamp(this.currentZoom, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX);
       this.cameras.main.setZoom(this.currentZoom);
     });
-
     this.scale.on('resize', (gameSize: Phaser.Structs.Size) => {
       setGameSize(gameSize.width, gameSize.height);
       this.minimap.reposition();
+      this.uiCamera.setSize(gameSize.width, gameSize.height);
     });
 
     setGameSize(this.scale.width, this.scale.height);

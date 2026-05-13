@@ -23,10 +23,16 @@ export class ChunkManager {
   private chunks: Map<string, Chunk> = new Map();
   private lastPlayerChunkX = -999;
   private lastPlayerChunkY = -999;
+  private ignoreCamera?: Phaser.Cameras.Scene2D.Camera;
 
-  constructor(scene: Phaser.Scene, generator: TerrainGenerator) {
+  constructor(
+    scene: Phaser.Scene,
+    generator: TerrainGenerator,
+    ignoreCamera?: Phaser.Cameras.Scene2D.Camera,
+  ) {
     this.scene = scene;
     this.generator = generator;
+    this.ignoreCamera = ignoreCamera;
   }
 
   update(playerWorldX: number, playerWorldY: number): void {
@@ -173,9 +179,12 @@ export class ChunkManager {
     const originX = cx * CHUNK_PIXELS + CHUNK_PIXELS / 2;
     const originY = cy * CHUNK_PIXELS + CHUNK_PIXELS / 2;
 
-    const image = this.scene.add.image(originX, originY, textureKey);
-    image.setOrigin(0.5, 0.5);
-    image.setDepth(0);
+     const image = this.scene.add.image(originX, originY, textureKey);
+     image.setOrigin(0.5, 0.5);
+     image.setDepth(0);
+     if (this.ignoreCamera) {
+       this.ignoreCamera.ignore(image);
+     }
 
     const placements = this.generator.generateStructures(cx, cy, tileTypes, biomes);
     const textureKeyMap: Record<StructureType, string> = {
@@ -189,10 +198,13 @@ export class ChunkManager {
     for (const p of placements) {
       const sx = cx * CHUNK_PIXELS + p.tileX * TILE_SIZE + TILE_SIZE / 2 + p.offsetX;
       const sy = cy * CHUNK_PIXELS + p.tileY * TILE_SIZE + TILE_SIZE + p.offsetY;
-      const sprite = this.scene.add.image(sx, sy, textureKeyMap[p.type]);
-      sprite.setOrigin(0.5, 1);
-      sprite.setDepth(5);
-      sprites.push(sprite);
+       const sprite = this.scene.add.image(sx, sy, textureKeyMap[p.type]);
+       sprite.setOrigin(0.5, 1);
+       sprite.setDepth(5);
+       if (this.ignoreCamera) {
+         this.ignoreCamera.ignore(sprite);
+       }
+       sprites.push(sprite);
     }
 
     this.chunks.set(key, { image, textureKey, sprites });
