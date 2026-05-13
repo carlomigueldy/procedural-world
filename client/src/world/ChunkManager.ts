@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import {
+  Biome,
   CHUNK_PIXELS,
   CHUNK_SIZE,
   getSmoothTileColor,
@@ -8,6 +9,7 @@ import {
   VIEW_RADIUS,
 } from '../config/constants';
 import { TerrainGenerator, biomeFromValues, StructurePlacement } from './TerrainGenerator';
+import { TREE_SPRITESHEET_KEY, TREE_FRAMES } from '../entities/TreeSpritesheetGenerator';
 
 const SAMPLE_RES = 4;
 
@@ -187,27 +189,71 @@ export class ChunkManager {
      }
 
     const placements = this.generator.generateStructures(cx, cy, tileTypes, biomes);
-    const textureKeyMap: Record<StructureType, string> = {
-      [StructureType.TREE]: 'structure-tree',
-      [StructureType.PINE]: 'structure-pine',
-      [StructureType.ROCK]: 'structure-rock',
-      [StructureType.BUSH]: 'structure-bush',
-    };
     const sprites: Phaser.GameObjects.Image[] = [];
 
     for (const p of placements) {
       const sx = cx * CHUNK_PIXELS + p.tileX * TILE_SIZE + TILE_SIZE / 2 + p.offsetX;
       const sy = cy * CHUNK_PIXELS + p.tileY * TILE_SIZE + TILE_SIZE + p.offsetY;
-       const sprite = this.scene.add.image(sx, sy, textureKeyMap[p.type]);
-       sprite.setOrigin(0.5, 1);
-       sprite.setDepth(5);
-       if (this.ignoreCamera) {
-         this.ignoreCamera.ignore(sprite);
-       }
-       sprites.push(sprite);
+
+      if (p.type === StructureType.TREE || p.type === StructureType.PINE) {
+        const biome = biomes[p.tileY]?.[p.tileX] ?? Biome.GRASSLAND;
+        const frame = this.structureFrame(p.type, biome, p.tileX, p.tileY);
+        const sprite = this.scene.add.image(sx, sy, TREE_SPRITESHEET_KEY, frame);
+        sprite.setOrigin(0.5, 1);
+        sprite.setDepth(5);
+        if (this.ignoreCamera) {
+          this.ignoreCamera.ignore(sprite);
+        }
+        sprites.push(sprite);
+      } else {
+        const textureKey: Record<StructureType, string> = {
+          [StructureType.TREE]: '',
+          [StructureType.PINE]: '',
+          [StructureType.ROCK]: 'structure-rock',
+          [StructureType.BUSH]: 'structure-bush',
+        };
+        const sprite = this.scene.add.image(sx, sy, textureKey[p.type]);
+        sprite.setOrigin(0.5, 1);
+        sprite.setDepth(5);
+        if (this.ignoreCamera) {
+          this.ignoreCamera.ignore(sprite);
+        }
+        sprites.push(sprite);
+      }
     }
 
     this.chunks.set(key, { image, textureKey, sprites });
+  }
+
+  private structureFrame(type: StructureType, biome: Biome, tileX: number, tileY: number): number {
+    const h = ((tileX * 374761393 + tileY * 668265263 + 42) | 0) >>> 0;
+    const variant = ((h ^ (h >>> 13)) & 0x7fffffff) % 4;
+
+    if (type === StructureType.PINE) {
+      return TREE_FRAMES.PINE_0 + variant;
+    }
+
+    let baseFrame: number;
+    switch (biome) {
+      case Biome.TAIGA:
+      case Biome.TUNDRA:
+      case Biome.ALPINE_MEADOW:
+        baseFrame = TREE_FRAMES.DEAD_0;
+        break;
+      case Biome.DESERT:
+      case Biome.SAVANNA:
+        baseFrame = TREE_FRAMES.AUTUMN_0;
+        break;
+      case Biome.RAINFOREST:
+      case Biome.TROPICAL_RAINFOREST:
+        baseFrame = TREE_FRAMES.OAK_0;
+        break;
+      default:
+        baseFrame = (h % 2 === 0) ? TREE_FRAMES.OAK_0 : TREE_FRAMES.AUTUMN_0;
+        break;
+    }
+
+    return baseFrame + variant;
   }
 
   destroy(): void {
