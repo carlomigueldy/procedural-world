@@ -1,11 +1,21 @@
 import Phaser from 'phaser';
 import { PLAYER_SPEED } from '../config/constants';
+import { CHARACTERS, charDirectionFrameIndex } from './CharacterGenerator';
+
+const ANIM_SPEED = 150;
 
 export class Player {
-  public sprite: Phaser.GameObjects.Rectangle;
+  public sprite: Phaser.GameObjects.Sprite;
+  public characterId: number;
+  private direction = 0;
+  private animFrame = 0;
+  private animTimer = 0;
+  private moving = false;
 
-  constructor(scene: Phaser.Scene, x: number, y: number) {
-    this.sprite = scene.add.rectangle(x, y, 16, 16, 0xff4444);
+  constructor(scene: Phaser.Scene, x: number, y: number, characterId: number) {
+    this.characterId = characterId;
+    const charDesign = CHARACTERS[characterId];
+    this.sprite = scene.add.sprite(x, y, charDesign.spriteKey, 'f0');
     this.sprite.setDepth(10);
   }
 
@@ -18,6 +28,7 @@ export class Player {
       D: Phaser.Input.Keyboard.Key;
     },
     delta: number,
+    speedMultiplier = 1,
   ): void {
     let vx = 0;
     let vy = 0;
@@ -34,9 +45,30 @@ export class Player {
       vy /= len;
     }
 
+    this.moving = vx !== 0 || vy !== 0;
+
+    if (vy > 0) this.direction = 0;
+    else if (vy < 0) this.direction = 3;
+    else if (vx < 0) this.direction = 1;
+    else if (vx > 0) this.direction = 2;
+
+    if (this.moving) {
+      this.animTimer += delta;
+      if (this.animTimer > ANIM_SPEED) {
+        this.animTimer = 0;
+        this.animFrame = (this.animFrame + 1) % 4;
+      }
+    } else {
+      this.animFrame = 0;
+      this.animTimer = 0;
+    }
+
+    const frameIndex = charDirectionFrameIndex(this.direction, this.animFrame);
+    this.sprite.setFrame(frameIndex);
+
     const dt = delta / 1000;
-    this.sprite.x += vx * PLAYER_SPEED * dt;
-    this.sprite.y += vy * PLAYER_SPEED * dt;
+    this.sprite.x += vx * PLAYER_SPEED * speedMultiplier * dt;
+    this.sprite.y += vy * PLAYER_SPEED * speedMultiplier * dt;
   }
 
   get x(): number {
