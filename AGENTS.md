@@ -93,19 +93,19 @@ docker compose up --build
 ## Known Patterns
 
 ### Terrain Generation
-- 3 octaves of 2D simplex noise (scales: 0.03, 0.06, 0.015)
+- 3 octaves of 2D simplex noise (scales: 0.004, 0.015, 0.040)
 - Weights: 0.6 / 0.3 / 0.1 for detail levels
 - Elevation → tile type via thresholds:
-  - 0.00–0.25: Deep water (#1a3a5c)
-  - 0.25–0.35: Shallow water (#2a6a9c)
-  - 0.35–0.40: Sand (#d4b87a)
-  - 0.40–0.60: Grass (#4a8c3f)
-  - 0.60–0.75: Forest (#2d5a27)
-  - 0.75–0.85: Stone (#7a7a7a)
-  - 0.85–1.00: Snow (#e8e8f0)
+  - 0.00–0.45: Deep water (#1a3a5c) — vast oceans (~45% of world)
+  - 0.45–0.53: Shallow water (#2a6a9c) — continental shelf
+  - 0.53–0.59: Sand (#d4b87a) — wide beaches
+  - 0.59–0.70: Grass (#4a8c3f) — plains
+  - 0.70–0.83: Forest (#2d5a27) — further inland
+  - 0.83–0.92: Stone (#7a7a7a) — mountain transitions
+  - 0.92–1.00: Snow (#e8e8f0) — high peaks
 
 ### Chunk System
-- Chunk size: 16×16 tiles (512×512 px)
+- Chunk size: 32×32 tiles (1024×1024 px)
 - View radius: 3 chunks (7×7 = 49 chunks loaded at a time)
 - Tile size: 32×32 px
 - Chunks rendered as Phaser `Graphics` (colored filled rects)
@@ -147,8 +147,8 @@ docker compose up --build
 | Constant | Value | Description |
 |---|---|---|
 | TILE_SIZE | 32 | Pixels per tile |
-| CHUNK_SIZE | 16 | Tiles per chunk axis |
-| CHUNK_PIXELS | 512 | Pixels per chunk axis |
+| CHUNK_SIZE | 32 | Tiles per chunk axis |
+| CHUNK_PIXELS | 1024 | Pixels per chunk axis |
 | VIEW_RADIUS | 3 | Chunks to load in each direction |
 | PLAYER_SPEED | 200 | Pixels per second |
 | GAME_WIDTH | 800 | Canvas width |
