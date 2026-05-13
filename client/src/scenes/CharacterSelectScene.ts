@@ -42,7 +42,7 @@ export class CharacterSelectScene extends Phaser.Scene {
     CHARACTERS.forEach((char, i) => {
       const rowY = LIST_TOP + i * ROW_H + 60;
 
-      const sprite = this.add.sprite(60, rowY + 16, char.spriteKey, 0);
+      const sprite = this.add.sprite(60, rowY + 16, char.spriteKey, 'f0');
       sprite.setScale(PREVIEW_SCALE);
       this.previewSprites.push(sprite);
 

@@ -15,7 +15,7 @@ export class Player {
   constructor(scene: Phaser.Scene, x: number, y: number, characterId: number) {
     this.characterId = characterId;
     const charDesign = CHARACTERS[characterId];
-    this.sprite = scene.add.sprite(x, y, charDesign.spriteKey, 0);
+    this.sprite = scene.add.sprite(x, y, charDesign.spriteKey, 'f0');
     this.sprite.setDepth(10);
   }
 

@@ -445,7 +445,7 @@ function generateSpriteSheet(scene: Phaser.Scene, key: string, drawCell: CellDra
     const frame = i % 4;
     const fx = frame * FRAME_W;
     const fy = dir * FRAME_H;
-    tex.add(i.toString(), 0, fx, fy, FRAME_W, FRAME_H);
+    tex.add(`f${i}`, 0, fx, fy, FRAME_W, FRAME_H);
   }
 
   const texture = scene.textures.get(key);
@@ -459,6 +459,6 @@ export function generateAllCharacterSpritesheets(scene: Phaser.Scene): void {
   generateSpriteSheet(scene, 'char-wanderer', drawWandererCell);
 }
 
-export function charDirectionFrameIndex(direction: number, frame: number): number {
-  return direction * 4 + frame;
+export function charDirectionFrameIndex(direction: number, frame: number): string {
+  return `f${direction * 4 + frame}`;
 }
