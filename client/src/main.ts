@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
+import { CharacterSelectScene } from './scenes/CharacterSelectScene';
 import { GameScene } from './scenes/GameScene';
 import { setGameSize } from './config/constants';
 
@@ -11,7 +12,7 @@ const config: Phaser.Types.Core.GameConfig = {
   height: window.innerHeight,
   parent: 'game',
   backgroundColor: '#000000',
-  scene: [BootScene, GameScene],
+  scene: [BootScene, CharacterSelectScene, GameScene],
   scale: {
     mode: Phaser.Scale.RESIZE,
   },

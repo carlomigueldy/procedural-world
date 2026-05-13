@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { generateAllCharacterSpritesheets } from '../entities/CharacterGenerator';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -75,7 +76,9 @@ export class BootScene extends Phaser.Scene {
       g.fillEllipse(16, 4, 6, 5);
     });
 
-    this.scene.start('GameScene');
+    generateAllCharacterSpritesheets(this);
+
+    this.scene.start('CharacterSelectScene');
   }
 
   private makeTexture(

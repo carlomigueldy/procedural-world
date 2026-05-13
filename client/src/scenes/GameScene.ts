@@ -21,12 +21,14 @@ export class GameScene extends Phaser.Scene {
     super({ key: 'GameScene' });
   }
 
-  create(): void {
+  create(data?: { characterId?: number }): void {
+    const characterId = data?.characterId ?? 0;
+
     const generator = new TerrainGenerator(SEED);
     this.chunkManager = new ChunkManager(this, generator);
     this.minimap = new Minimap(this, generator);
 
-    this.player = new Player(this, 0, 0);
+    this.player = new Player(this, 0, 0, characterId);
 
     this.cameras.main.setBounds(-100000, -100000, 200000, 200000);
     this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
