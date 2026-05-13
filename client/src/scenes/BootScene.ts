@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { generateAllCharacterSpritesheets } from '../entities/CharacterGenerator';
+import { generateTreeSpritesheet } from '../entities/TreeSpritesheetGenerator';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -7,42 +8,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.makeTexture('structure-tree', 36, 48, (g) => {
-      g.fillStyle(0x5a3a1a);
-      g.fillRect(16, 34, 4, 14);
-      g.fillStyle(0x4a2a0a);
-      g.fillRect(16, 34, 2, 14);
-      g.fillStyle(0x1a4a1a);
-      g.fillEllipse(18, 30, 32, 22);
-      g.fillStyle(0x2d6a27);
-      g.fillEllipse(18, 26, 28, 20);
-      g.fillStyle(0x3a7a2f);
-      g.fillEllipse(18, 20, 22, 18);
-      g.fillStyle(0x4a8a3f);
-      g.fillEllipse(18, 14, 16, 14);
-      g.fillStyle(0x5a9a4f);
-      g.fillEllipse(18, 8, 10, 10);
-    });
-
-    this.makeTexture('structure-pine', 28, 48, (g) => {
-      g.fillStyle(0x4a2a0a);
-      g.fillRect(13, 32, 2, 16);
-
-      g.fillStyle(0x142e14);
-      g.fillTriangle(0, 40, 14, 16, 28, 40);
-      g.fillTriangle(2, 34, 14, 10, 26, 34);
-      g.fillTriangle(4, 28, 14, 4, 24, 28);
-      g.fillTriangle(6, 22, 14, 0, 22, 22);
-
-      g.fillStyle(0x1a3a1a);
-      g.fillTriangle(2, 36, 14, 16, 26, 36);
-      g.fillTriangle(4, 30, 14, 10, 24, 30);
-      g.fillTriangle(6, 24, 14, 4, 22, 24);
-
-      g.fillStyle(0x2a4a2a);
-      g.fillTriangle(4, 32, 14, 16, 24, 32);
-      g.fillTriangle(6, 26, 14, 8, 22, 26);
-    });
+    generateTreeSpritesheet(this);
 
     this.makeTexture('structure-rock', 28, 16, (g) => {
       g.fillStyle(0x2a2a2a);
