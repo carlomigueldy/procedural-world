@@ -64,6 +64,20 @@ procedural-world/
 - Docker Compose with PostgreSQL
 - Database schema for players
 
+**Phase 2 — Enhanced Terrain** ✅ Complete
+
+- Secondary noise layer for humidity/temperature → biomes (9 biomes)
+- Structure objects placed (trees, pine, rocks, bushes) based on biome/elevation
+- Smooth terrain rendering with sub-tile color interpolation
+- Minimap with player position marker and viewport indicator
+- Character sprite system with 4 characters (Adventurer, Hooded, Knight, Wanderer)
+- Walking animation (4 directions × 4 frames)
+- Character selection screen
+- Responsive fullscreen canvas with window resize handling
+- Camera zoom controls (0.5x - 5x)
+
+> **⚠️ Agent Maintenance:** When developing or marking features complete, always update this AGENTS.md file to reflect the current state. Keep the "Current Status" section accurate and move completed phases/items to the done state.
+
 ## Setup & Development
 
 ```bash
@@ -117,12 +131,6 @@ docker compose up --build
 - Camera: smooth follow (lerp 0.1), bounds at ±100k px
 
 ## What's Next (Planned Phases)
-
-### Phase 2 — Enhanced Terrain
-- [ ] Add secondary noise layer for humidity/temperature → biomes
-- [ ] Place structure objects (trees, rocks, bushes) as sprites
-- [ ] Generate transition tiles (blend between biome edges)
-- [ ] Add a minimap
 
 ### Phase 3 — Interaction & Gameplay
 - [ ] Tile interaction (click to inspect, gather resources)
