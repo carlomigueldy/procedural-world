@@ -17,6 +17,24 @@ function seededRandom(seed: number): () => number {
   };
 }
 
+export function biomeFromValues(humidity: number, temperature: number): Biome {
+  if (temperature < 0.33) {
+    if (humidity < 0.33) return Biome.TUNDRA;
+    if (humidity < 0.66) return Biome.TAIGA;
+    return Biome.ALPINE_MEADOW;
+  }
+
+  if (temperature < 0.66) {
+    if (humidity < 0.33) return Biome.GRASSLAND;
+    if (humidity < 0.66) return Biome.TEMPERATE_FOREST;
+    return Biome.RAINFOREST;
+  }
+
+  if (humidity < 0.33) return Biome.DESERT;
+  if (humidity < 0.66) return Biome.SAVANNA;
+  return Biome.TROPICAL_RAINFOREST;
+}
+
 export class TerrainGenerator {
   private noise2D: NoiseFunction2D;
 
@@ -28,7 +46,7 @@ export class TerrainGenerator {
     return (value + 1) / 2;
   }
 
-  private getElevation(worldX: number, worldY: number): number {
+  getElevation(worldX: number, worldY: number): number {
     const scale1 = 0.004;
     const scale2 = 0.015;
     const scale3 = 0.040;
@@ -40,11 +58,11 @@ export class TerrainGenerator {
     return Math.min(1, Math.max(0, e1 + e2 + e3));
   }
 
-  private getHumidity(worldX: number, worldY: number): number {
+  getHumidity(worldX: number, worldY: number): number {
     return this.normalize(this.noise2D(worldX * 0.008, worldY * 0.008));
   }
 
-  private getTemperature(worldX: number, worldY: number): number {
+  getTemperature(worldX: number, worldY: number): number {
     return this.normalize(this.noise2D(worldX * 0.006 + 1000, worldY * 0.006 + 1000));
   }
 
@@ -61,24 +79,7 @@ export class TerrainGenerator {
   }
 
   getBiome(worldX: number, worldY: number): Biome {
-    const humidity = this.getHumidity(worldX, worldY);
-    const temperature = this.getTemperature(worldX, worldY);
-
-    if (temperature < 0.33) {
-      if (humidity < 0.33) return Biome.TUNDRA;
-      if (humidity < 0.66) return Biome.TAIGA;
-      return Biome.ALPINE_MEADOW;
-    }
-
-    if (temperature < 0.66) {
-      if (humidity < 0.33) return Biome.GRASSLAND;
-      if (humidity < 0.66) return Biome.TEMPERATE_FOREST;
-      return Biome.RAINFOREST;
-    }
-
-    if (humidity < 0.33) return Biome.DESERT;
-    if (humidity < 0.66) return Biome.SAVANNA;
-    return Biome.TROPICAL_RAINFOREST;
+    return biomeFromValues(this.getHumidity(worldX, worldY), this.getTemperature(worldX, worldY));
   }
 
   generateChunk(chunkX: number, chunkY: number): TileType[][] {
