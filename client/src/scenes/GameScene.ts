@@ -56,12 +56,13 @@ export class GameScene extends Phaser.Scene {
 
     setGameSize(this.scale.width, this.scale.height);
     this.chunkManager.update(this.player.x, this.player.y);
-    this.minimap.update(this.player.x, this.player.y, this.currentZoom);
+    this.minimap.update(this.player.x, this.player.y);
   }
 
   update(_time: number, delta: number): void {
-    this.player.update(this.cursors, this.wasd, delta);
+    const speedMul = 1 / this.currentZoom;
+    this.player.update(this.cursors, this.wasd, delta, speedMul);
     this.chunkManager.update(this.player.x, this.player.y);
-    this.minimap.update(this.player.x, this.player.y, this.currentZoom);
+    this.minimap.update(this.player.x, this.player.y);
   }
 }

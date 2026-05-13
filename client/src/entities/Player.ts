@@ -28,6 +28,7 @@ export class Player {
       D: Phaser.Input.Keyboard.Key;
     },
     delta: number,
+    speedMultiplier = 1,
   ): void {
     let vx = 0;
     let vy = 0;
@@ -66,8 +67,8 @@ export class Player {
     this.sprite.setFrame(frameIndex);
 
     const dt = delta / 1000;
-    this.sprite.x += vx * PLAYER_SPEED * dt;
-    this.sprite.y += vy * PLAYER_SPEED * dt;
+    this.sprite.x += vx * PLAYER_SPEED * speedMultiplier * dt;
+    this.sprite.y += vy * PLAYER_SPEED * speedMultiplier * dt;
   }
 
   get x(): number {

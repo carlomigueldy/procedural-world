@@ -58,7 +58,7 @@ export class Minimap {
     this.container.add(this.playerMarker);
   }
 
-  update(playerWorldX: number, playerWorldY: number, cameraZoom = 1): void {
+  update(playerWorldX: number, playerWorldY: number): void {
     const chunkX = Math.floor(playerWorldX / (CHUNK_SIZE * TILE_SIZE));
     const chunkY = Math.floor(playerWorldY / (CHUNK_SIZE * TILE_SIZE));
 
@@ -68,7 +68,7 @@ export class Minimap {
       this.regenerate(playerWorldX, playerWorldY);
     }
 
-    this.updateMarkers(playerWorldX, playerWorldY, cameraZoom);
+    this.updateMarkers(playerWorldX, playerWorldY);
   }
 
   private regenerate(playerWorldX: number, playerWorldY: number): void {
@@ -95,7 +95,7 @@ export class Minimap {
     }
   }
 
-  private updateMarkers(playerWorldX: number, playerWorldY: number, cameraZoom: number): void {
+  private updateMarkers(playerWorldX: number, playerWorldY: number): void {
     const halfTiles = Math.floor(this.tilesPerSide / 2);
     const centerTileX = Math.floor(playerWorldX / TILE_SIZE);
     const centerTileY = Math.floor(playerWorldY / TILE_SIZE);
@@ -107,8 +107,8 @@ export class Minimap {
     this.playerMarker.setPosition(markerX, markerY);
 
     this.viewportGfx.clear();
-    const vpW = (this.scene.scale.width / TILE_SIZE) * MINIMAP_TILE_SIZE / cameraZoom;
-    const vpH = (this.scene.scale.height / TILE_SIZE) * MINIMAP_TILE_SIZE / cameraZoom;
+    const vpW = (this.scene.scale.width / TILE_SIZE) * MINIMAP_TILE_SIZE;
+    const vpH = (this.scene.scale.height / TILE_SIZE) * MINIMAP_TILE_SIZE;
     this.viewportGfx.strokeRect(
       markerX - vpW / 2,
       markerY - vpH / 2,
