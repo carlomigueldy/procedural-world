@@ -3,7 +3,7 @@ import {
   CHUNK_SIZE,
   MINIMAP_MARGIN,
   MINIMAP_TILE_SIZE,
-  getTileColor,
+  getSmoothTileColor,
   TILE_SIZE,
   VIEW_RADIUS,
 } from '../config/constants';
@@ -82,9 +82,9 @@ export class Minimap {
       for (let mx = 0; mx < this.tilesPerSide; mx++) {
         const tileX = centerTileX - halfTiles + mx;
         const tileY = centerTileY - halfTiles + my;
-        const tileType = this.generator.getTileType(tileX, tileY);
+        const elevation = this.generator.getElevation(tileX, tileY);
         const biome = this.generator.getBiome(tileX, tileY);
-        this.terrainGfx.fillStyle(getTileColor(tileType, biome), 1);
+        this.terrainGfx.fillStyle(getSmoothTileColor(elevation, biome), 1);
         this.terrainGfx.fillRect(
           mx * MINIMAP_TILE_SIZE,
           my * MINIMAP_TILE_SIZE,
