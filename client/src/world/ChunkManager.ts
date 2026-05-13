@@ -1,18 +1,24 @@
 import Phaser from 'phaser';
 import {
+  Biome,
   CHUNK_SIZE,
   CHUNK_PIXELS,
+  StructureType,
   TILE_SIZE,
   VIEW_RADIUS,
-  TILE_COLORS,
   TileType,
 } from '../config/constants';
-import { TerrainGenerator } from './TerrainGenerator';
+import { TerrainGenerator, StructurePlacement } from './TerrainGenerator';
 
 interface Chunk {
   tileTypes: TileType[][];
-  graphics: Phaser.GameObjects.Graphics;
+  biomes: Biome[][];
+  layer: Phaser.Tilemaps.TilemapLayer;
+  map: Phaser.Tilemaps.Tilemap;
+  sprites: Phaser.GameObjects.Image[];
 }
+
+const TILESET_KEY = 'terrain-tileset';
 
 export class ChunkManager {
   private scene: Phaser.Scene;
@@ -54,7 +60,11 @@ export class ChunkManager {
 
     for (const [key, chunk] of this.chunks) {
       if (!needed.has(key)) {
-        chunk.graphics.destroy();
+        chunk.layer.destroy();
+        chunk.map.destroy();
+        for (const s of chunk.sprites) {
+          s.destroy();
+        }
         this.chunks.delete(key);
       }
     }
@@ -62,31 +72,56 @@ export class ChunkManager {
 
   private createChunk(cx: number, cy: number, key: string): void {
     const tileTypes = this.generator.generateChunk(cx, cy);
-    const gfx = this.scene.add.graphics();
-    gfx.setDepth(0);
+    const biomes = this.generator.generateBiomeChunk(cx, cy);
 
     const originX = cx * CHUNK_PIXELS;
     const originY = cy * CHUNK_PIXELS;
 
+    const map = this.scene.make.tilemap({
+      tileWidth: TILE_SIZE,
+      tileHeight: TILE_SIZE,
+      width: CHUNK_SIZE,
+      height: CHUNK_SIZE,
+    });
+    const tileset = map.addTilesetImage(TILESET_KEY)!;
+    const layer = map.createBlankLayer('layer', tileset, originX, originY)!;
+    layer.setDepth(0);
+
     for (let y = 0; y < CHUNK_SIZE; y++) {
       for (let x = 0; x < CHUNK_SIZE; x++) {
-        const color = TILE_COLORS[tileTypes[y][x]];
-        gfx.fillStyle(color, 1);
-        gfx.fillRect(
-          originX + x * TILE_SIZE,
-          originY + y * TILE_SIZE,
-          TILE_SIZE,
-          TILE_SIZE,
-        );
+        const index = (tileTypes[y][x] as number) * 9 + (biomes[y][x] as number);
+        layer.putTileAt(index, x, y);
       }
     }
 
-    this.chunks.set(key, { tileTypes, graphics: gfx });
+    const placements = this.generator.generateStructures(cx, cy, tileTypes, biomes);
+    const textureKey: Record<StructureType, string> = {
+      [StructureType.TREE]: 'structure-tree',
+      [StructureType.PINE]: 'structure-pine',
+      [StructureType.ROCK]: 'structure-rock',
+      [StructureType.BUSH]: 'structure-bush',
+    };
+    const sprites: Phaser.GameObjects.Image[] = [];
+
+    for (const p of placements) {
+      const sx = cx * CHUNK_PIXELS + p.tileX * TILE_SIZE + TILE_SIZE / 2 + p.offsetX;
+      const sy = cy * CHUNK_PIXELS + p.tileY * TILE_SIZE + TILE_SIZE + p.offsetY;
+      const sprite = this.scene.add.image(sx, sy, textureKey[p.type]);
+      sprite.setOrigin(0.5, 1);
+      sprite.setDepth(5);
+      sprites.push(sprite);
+    }
+
+    this.chunks.set(key, { tileTypes, biomes, layer, map, sprites });
   }
 
   destroy(): void {
     for (const chunk of this.chunks.values()) {
-      chunk.graphics.destroy();
+      chunk.layer.destroy();
+      chunk.map.destroy();
+      for (const s of chunk.sprites) {
+        s.destroy();
+      }
     }
     this.chunks.clear();
   }
