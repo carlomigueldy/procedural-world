@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import {
   CHUNK_PIXELS,
+  CHUNK_SIZE,
   getSmoothTileColor,
   StructureType,
   TILE_SIZE,
@@ -80,26 +81,63 @@ export class ChunkManager {
       return texKey;
     }
 
+    const gridSize = CHUNK_SIZE + 1;
+    const elevGrid = new Float32Array(gridSize * gridSize);
+    const humidGrid = new Float32Array(gridSize * gridSize);
+    const tempGrid = new Float32Array(gridSize * gridSize);
+
+    for (let gy = 0; gy < gridSize; gy++) {
+      for (let gx = 0; gx < gridSize; gx++) {
+        const wtX = cx * CHUNK_SIZE + gx;
+        const wtY = cy * CHUNK_SIZE + gy;
+        const idx = gy * gridSize + gx;
+        elevGrid[idx] = this.generator.getElevation(wtX, wtY);
+        humidGrid[idx] = this.generator.getHumidity(wtX, wtY);
+        tempGrid[idx] = this.generator.getTemperature(wtX, wtY);
+      }
+    }
+
     const canvas = document.createElement('canvas');
     canvas.width = CHUNK_PIXELS;
     canvas.height = CHUNK_PIXELS;
     const ctx = canvas.getContext('2d')!;
 
-    const samples = CHUNK_PIXELS / SAMPLE_RES;
     const imgData = ctx.createImageData(CHUNK_PIXELS, CHUNK_PIXELS);
     const pixels = imgData.data;
+    const samples = CHUNK_PIXELS / SAMPLE_RES;
 
     for (let sy = 0; sy < samples; sy++) {
       for (let sx = 0; sx < samples; sx++) {
-        const worldTileX = (cx * CHUNK_PIXELS + sx * SAMPLE_RES + SAMPLE_RES / 2) / TILE_SIZE;
-        const worldTileY = (cy * CHUNK_PIXELS + sy * SAMPLE_RES + SAMPLE_RES / 2) / TILE_SIZE;
+        const fracX = (sx * SAMPLE_RES + SAMPLE_RES / 2) / TILE_SIZE;
+        const fracY = (sy * SAMPLE_RES + SAMPLE_RES / 2) / TILE_SIZE;
 
-        const elevation = this.generator.getElevation(worldTileX, worldTileY);
-        const humidity = this.generator.getHumidity(worldTileX, worldTileY);
-        const temperature = this.generator.getTemperature(worldTileX, worldTileY);
-        const biome = biomeFromValues(humidity, temperature);
+        const gx = Math.min(Math.floor(fracX), gridSize - 2);
+        const gy = Math.min(Math.floor(fracY), gridSize - 2);
+        const tx = fracX - gx;
+        const ty = fracY - gy;
 
-        const color = getSmoothTileColor(elevation, biome);
+        const i00 = gy * gridSize + gx;
+        const i10 = i00 + 1;
+        const i01 = i00 + gridSize;
+        const i11 = i01 + 1;
+
+        const e = elevGrid[i00]
+          + (elevGrid[i10] - elevGrid[i00]) * tx
+          + (elevGrid[i01] - elevGrid[i00]) * ty
+          + (elevGrid[i00] - elevGrid[i10] - elevGrid[i01] + elevGrid[i11]) * tx * ty;
+
+        const h = humidGrid[i00]
+          + (humidGrid[i10] - humidGrid[i00]) * tx
+          + (humidGrid[i01] - humidGrid[i00]) * ty
+          + (humidGrid[i00] - humidGrid[i10] - humidGrid[i01] + humidGrid[i11]) * tx * ty;
+
+        const t = tempGrid[i00]
+          + (tempGrid[i10] - tempGrid[i00]) * tx
+          + (tempGrid[i01] - tempGrid[i00]) * ty
+          + (tempGrid[i00] - tempGrid[i10] - tempGrid[i01] + tempGrid[i11]) * tx * ty;
+
+        const biome = biomeFromValues(h, t);
+        const color = getSmoothTileColor(e, biome);
         const noise = (this.tileHash(sx, sy, 99) - 0.5) * 12;
         let r = ((color >> 16) & 0xff) + noise;
         let g = ((color >> 8) & 0xff) + noise;
