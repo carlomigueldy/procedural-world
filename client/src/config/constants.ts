@@ -11,6 +11,11 @@ export function setGameSize(width: number, height: number): void {
 }
 export const PLAYER_SPEED = 200;
 
+export const CAMERA_ZOOM_MIN = 0.5;
+export const CAMERA_ZOOM_MAX = 5;
+export const CAMERA_ZOOM_DEFAULT = 3;
+export const CAMERA_ZOOM_STEP = 0.25;
+
 export const SEED = 42;
 
 export const MINIMAP_TILE_SIZE = 1;
