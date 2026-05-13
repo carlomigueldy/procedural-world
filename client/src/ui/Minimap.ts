@@ -3,7 +3,7 @@ import {
   CHUNK_SIZE,
   MINIMAP_MARGIN,
   MINIMAP_TILE_SIZE,
-  getTileColor,
+  getSmoothTileColor,
   TILE_SIZE,
   VIEW_RADIUS,
 } from '../config/constants';
@@ -58,7 +58,7 @@ export class Minimap {
     this.container.add(this.playerMarker);
   }
 
-  update(playerWorldX: number, playerWorldY: number): void {
+  update(playerWorldX: number, playerWorldY: number, cameraZoom: number): void {
     const chunkX = Math.floor(playerWorldX / (CHUNK_SIZE * TILE_SIZE));
     const chunkY = Math.floor(playerWorldY / (CHUNK_SIZE * TILE_SIZE));
 
@@ -68,7 +68,7 @@ export class Minimap {
       this.regenerate(playerWorldX, playerWorldY);
     }
 
-    this.updateMarkers(playerWorldX, playerWorldY);
+    this.updateMarkers(playerWorldX, playerWorldY, cameraZoom);
   }
 
   private regenerate(playerWorldX: number, playerWorldY: number): void {
@@ -82,9 +82,9 @@ export class Minimap {
       for (let mx = 0; mx < this.tilesPerSide; mx++) {
         const tileX = centerTileX - halfTiles + mx;
         const tileY = centerTileY - halfTiles + my;
-        const tileType = this.generator.getTileType(tileX, tileY);
+        const elevation = this.generator.getElevation(tileX, tileY);
         const biome = this.generator.getBiome(tileX, tileY);
-        this.terrainGfx.fillStyle(getTileColor(tileType, biome), 1);
+        this.terrainGfx.fillStyle(getSmoothTileColor(elevation, biome), 1);
         this.terrainGfx.fillRect(
           mx * MINIMAP_TILE_SIZE,
           my * MINIMAP_TILE_SIZE,
@@ -95,7 +95,7 @@ export class Minimap {
     }
   }
 
-  private updateMarkers(playerWorldX: number, playerWorldY: number): void {
+  private updateMarkers(playerWorldX: number, playerWorldY: number, cameraZoom: number): void {
     const halfTiles = Math.floor(this.tilesPerSide / 2);
     const centerTileX = Math.floor(playerWorldX / TILE_SIZE);
     const centerTileY = Math.floor(playerWorldY / TILE_SIZE);
@@ -107,8 +107,8 @@ export class Minimap {
     this.playerMarker.setPosition(markerX, markerY);
 
     this.viewportGfx.clear();
-    const vpW = (this.scene.scale.width / TILE_SIZE) * MINIMAP_TILE_SIZE;
-    const vpH = (this.scene.scale.height / TILE_SIZE) * MINIMAP_TILE_SIZE;
+    const vpW = (this.scene.scale.width / TILE_SIZE) * MINIMAP_TILE_SIZE / cameraZoom;
+    const vpH = (this.scene.scale.height / TILE_SIZE) * MINIMAP_TILE_SIZE / cameraZoom;
     this.viewportGfx.strokeRect(
       markerX - vpW / 2,
       markerY - vpH / 2,

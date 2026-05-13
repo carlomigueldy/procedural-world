@@ -11,6 +11,11 @@ export function setGameSize(width: number, height: number): void {
 }
 export const PLAYER_SPEED = 200;
 
+export const CAMERA_ZOOM_MIN = 0.5;
+export const CAMERA_ZOOM_MAX = 5;
+export const CAMERA_ZOOM_DEFAULT = 3;
+export const CAMERA_ZOOM_STEP = 0.25;
+
 export const SEED = 42;
 
 export const MINIMAP_TILE_SIZE = 1;
@@ -108,6 +113,58 @@ export function darkenColor(color: number, amount: number): number {
   return (r << 16) | (g << 8) | b;
 }
 
+export function lerpColor(a: number, b: number, t: number): number {
+  const ar = (a >> 16) & 0xff;
+  const ag = (a >> 8) & 0xff;
+  const ab = a & 0xff;
+  const br = (b >> 16) & 0xff;
+  const bg = (b >> 8) & 0xff;
+  const bb = b & 0xff;
+  const r = Math.round(ar + (br - ar) * t);
+  const g = Math.round(ag + (bg - ag) * t);
+  const bl = Math.round(ab + (bb - ab) * t);
+  return (r << 16) | (g << 8) | bl;
+}
+
+export function smoothstep(t: number): number {
+  return t * t * (3 - 2 * t);
+}
+
+export function getSmoothTileColor(elevation: number, biome: Biome): number {
+  const stops: { pos: number; type: TileType }[] = [
+    { pos: 0.00, type: TileType.WATER_DEEP },
+    { pos: 0.45, type: TileType.WATER_DEEP },
+    { pos: 0.49, type: TileType.WATER_SHALLOW },
+    { pos: 0.53, type: TileType.WATER_SHALLOW },
+    { pos: 0.56, type: TileType.SAND },
+    { pos: 0.59, type: TileType.SAND },
+    { pos: 0.645, type: TileType.GRASS },
+    { pos: 0.70, type: TileType.GRASS },
+    { pos: 0.765, type: TileType.FOREST },
+    { pos: 0.83, type: TileType.FOREST },
+    { pos: 0.875, type: TileType.STONE },
+    { pos: 0.92, type: TileType.STONE },
+    { pos: 1.00, type: TileType.SNOW },
+  ];
+
+  for (let i = 0; i < stops.length - 1; i++) {
+    if (elevation >= stops[i].pos && elevation <= stops[i + 1].pos) {
+      if (stops[i].type === stops[i + 1].type) {
+        return getTileColor(stops[i].type, biome);
+      }
+      const range = stops[i + 1].pos - stops[i].pos;
+      if (range === 0) return getTileColor(stops[i].type, biome);
+      const t = (elevation - stops[i].pos) / range;
+      return lerpColor(
+        getTileColor(stops[i].type, biome),
+        getTileColor(stops[i + 1].type, biome),
+        smoothstep(t),
+      );
+    }
+  }
+
+  return getTileColor(TileType.SNOW, biome);
+}
 export enum StructureType {
   TREE = 0,
   PINE = 1,
