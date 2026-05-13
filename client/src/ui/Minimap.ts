@@ -58,6 +58,10 @@ export class Minimap {
     this.container.add(this.playerMarker);
   }
 
+  getContainer(): Phaser.GameObjects.Container {
+    return this.container;
+  }
+
   update(playerWorldX: number, playerWorldY: number, cameraZoom: number): void {
     const chunkX = Math.floor(playerWorldX / (CHUNK_SIZE * TILE_SIZE));
     const chunkY = Math.floor(playerWorldY / (CHUNK_SIZE * TILE_SIZE));
