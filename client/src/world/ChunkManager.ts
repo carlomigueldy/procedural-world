@@ -91,12 +91,12 @@ export class ChunkManager {
 
     for (let sy = 0; sy < samples; sy++) {
       for (let sx = 0; sx < samples; sx++) {
-        const worldX = cx * CHUNK_PIXELS + sx * SAMPLE_RES + SAMPLE_RES / 2;
-        const worldY = cy * CHUNK_PIXELS + sy * SAMPLE_RES + SAMPLE_RES / 2;
+        const worldTileX = (cx * CHUNK_PIXELS + sx * SAMPLE_RES + SAMPLE_RES / 2) / TILE_SIZE;
+        const worldTileY = (cy * CHUNK_PIXELS + sy * SAMPLE_RES + SAMPLE_RES / 2) / TILE_SIZE;
 
-        const elevation = this.generator.getElevation(worldX, worldY);
-        const humidity = this.generator.getHumidity(worldX, worldY);
-        const temperature = this.generator.getTemperature(worldX, worldY);
+        const elevation = this.generator.getElevation(worldTileX, worldTileY);
+        const humidity = this.generator.getHumidity(worldTileX, worldTileY);
+        const temperature = this.generator.getTemperature(worldTileX, worldTileY);
         const biome = biomeFromValues(humidity, temperature);
 
         const color = getSmoothTileColor(elevation, biome);
