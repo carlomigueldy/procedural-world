@@ -157,6 +157,16 @@ export class TerrainGenerator {
     return placements;
   }
 
+  isSuitableForBuilding(worldX: number, worldY: number): boolean {
+    const tileType = this.getTileType(worldX, worldY);
+    return tileType === TileType.GRASS || tileType === TileType.FOREST;
+  }
+
+  isSuitableForRoad(worldX: number, worldY: number): boolean {
+    const tileType = this.getTileType(worldX, worldY);
+    return tileType !== TileType.WATER_DEEP && tileType !== TileType.WATER_SHALLOW && tileType !== TileType.SNOW;
+  }
+
   private placementHash(tileX: number, tileY: number, seed: number): number {
     let h = (tileX * 374761393 + tileY * 668265263 + seed * 1274126177) | 0;
     h = ((h ^ (h >>> 13)) * 1274126177) | 0;
