@@ -3,11 +3,16 @@ import {
   CHUNK_PIXELS,
   CHUNK_SIZE,
   getSmoothTileColor,
+  ROAD_COLOR,
+  ROAD_WIDTH,
   StructureType,
   TILE_SIZE,
   VIEW_RADIUS,
 } from '../config/constants';
 import { TerrainGenerator, biomeFromValues, StructurePlacement } from './TerrainGenerator';
+import { RoadGenerator } from './RoadGenerator';
+import { BuildingGenerator } from './BuildingGenerator';
+import { BuildingEntity } from '../entities/Building';
 
 const SAMPLE_RES = 4;
 
@@ -15,11 +20,15 @@ interface Chunk {
   image: Phaser.GameObjects.Image;
   textureKey: string;
   sprites: Phaser.GameObjects.Image[];
+  roadGraphics: Phaser.GameObjects.Graphics;
+  buildings: BuildingEntity[];
 }
 
 export class ChunkManager {
   private scene: Phaser.Scene;
   private generator: TerrainGenerator;
+  private roadGenerator: RoadGenerator;
+  private buildingGenerator: BuildingGenerator;
   private chunks: Map<string, Chunk> = new Map();
   private lastPlayerChunkX = -999;
   private lastPlayerChunkY = -999;
@@ -28,10 +37,13 @@ export class ChunkManager {
   constructor(
     scene: Phaser.Scene,
     generator: TerrainGenerator,
+    seed: number,
     ignoreCamera?: Phaser.Cameras.Scene2D.Camera,
   ) {
     this.scene = scene;
     this.generator = generator;
+    this.roadGenerator = new RoadGenerator(generator, seed);
+    this.buildingGenerator = new BuildingGenerator(generator, seed);
     this.ignoreCamera = ignoreCamera;
   }
 
@@ -67,6 +79,10 @@ export class ChunkManager {
         this.scene.textures.remove(chunk.textureKey);
         for (const s of chunk.sprites) {
           s.destroy();
+        }
+        chunk.roadGraphics.destroy();
+        for (const b of chunk.buildings) {
+          b.destroy();
         }
         this.chunks.delete(key);
       }
@@ -207,7 +223,30 @@ export class ChunkManager {
        sprites.push(sprite);
     }
 
-    this.chunks.set(key, { image, textureKey, sprites });
+    // Generate roads for this chunk
+    const roads = this.roadGenerator.generateRoadsForChunk(cx, cy);
+    const roadGraphics = this.scene.add.graphics();
+    roadGraphics.lineStyle(ROAD_WIDTH, ROAD_COLOR, 1);
+    for (const road of roads) {
+      roadGraphics.lineBetween(road.startX, road.startY, road.endX, road.endY);
+    }
+    roadGraphics.setDepth(1);
+    if (this.ignoreCamera) {
+      this.ignoreCamera.ignore(roadGraphics);
+    }
+
+    // Generate buildings for this chunk
+    const buildingData = this.buildingGenerator.generateBuildingsForChunk(cx, cy, roads);
+    const buildings: BuildingEntity[] = [];
+    for (const b of buildingData) {
+      const entity = new BuildingEntity(this.scene, b);
+      if (this.ignoreCamera) {
+        this.ignoreCamera.ignore(entity.container);
+      }
+      buildings.push(entity);
+    }
+
+    this.chunks.set(key, { image, textureKey, sprites, roadGraphics, buildings });
   }
 
   destroy(): void {
@@ -216,6 +255,10 @@ export class ChunkManager {
       this.scene.textures.remove(chunk.textureKey);
       for (const s of chunk.sprites) {
         s.destroy();
+      }
+      chunk.roadGraphics.destroy();
+      for (const b of chunk.buildings) {
+        b.destroy();
       }
     }
     this.chunks.clear();

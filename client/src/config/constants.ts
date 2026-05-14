@@ -21,6 +21,37 @@ export const SEED = 42;
 export const MINIMAP_TILE_SIZE = 1;
 export const MINIMAP_MARGIN = 12;
 
+export const ROAD_CELL_SIZE = 4;
+export const ROAD_WIDTH = 2;
+export const ROAD_COLOR = 0x8a7a6a;
+export const MAX_BUILDINGS_PER_CHUNK = 6;
+export const BUILDING_MIN_DISTANCE = 200;
+export const BUILDING_ROAD_PROXIMITY = 150;
+
+export enum BuildingType {
+  HOUSE = 0,
+  FARM = 1,
+  TAVERN = 2,
+  SHRINE = 3,
+  WATCHTOWER = 4,
+}
+
+export const BUILDING_COLORS: Record<BuildingType, { base: number; roof: number }> = {
+  [BuildingType.HOUSE]: { base: 0x8a7a5a, roof: 0x6a4a3a },
+  [BuildingType.FARM]: { base: 0x7a6a4a, roof: 0x5a4a3a },
+  [BuildingType.TAVERN]: { base: 0x9a6a4a, roof: 0x5a3a2a },
+  [BuildingType.SHRINE]: { base: 0x9a9a8a, roof: 0x6a6a5a },
+  [BuildingType.WATCHTOWER]: { base: 0x7a7a7a, roof: 0x5a3a2a },
+};
+
+export const BUILDING_FOOTPRINTS: Record<BuildingType, { width: number; height: number }> = {
+  [BuildingType.HOUSE]: { width: 2, height: 2 },
+  [BuildingType.FARM]: { width: 4, height: 3 },
+  [BuildingType.TAVERN]: { width: 3, height: 3 },
+  [BuildingType.SHRINE]: { width: 2, height: 2 },
+  [BuildingType.WATCHTOWER]: { width: 2, height: 2 },
+};
+
 export enum TileType {
   WATER_DEEP = 0,
   WATER_SHALLOW = 1,

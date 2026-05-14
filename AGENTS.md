@@ -75,6 +75,9 @@ procedural-world/
 - Character selection screen
 - Responsive fullscreen canvas with window resize handling
 - Camera zoom controls (0.5x - 5x)
+- **Road generation** — cell-based waypoint placement (4×4 chunk cells), Kruskal MST + random loop edges for connected road networks
+- **Building generation** — 5 building types (House, Farm, Tavern, Shrine, Watchtower) placed near roads (towns) and isolated (shrines), with distance checks and terrain validation
+- Colored rectangle buildings with pseudo-3D effect (base, roof, door)
 
 > **⚠️ Agent Maintenance:** When developing or marking features complete, always update this AGENTS.md file to reflect the current state. Keep the "Current Status" section accurate and move completed phases/items to the done state.
 
@@ -162,3 +165,8 @@ docker compose up --build
 | GAME_WIDTH | 800 | Canvas width |
 | GAME_HEIGHT | 600 | Canvas height |
 | SEED | 42 | World generation seed |
+| ROAD_CELL_SIZE | 4 | Chunks per road-generation cell |
+| ROAD_WIDTH | 2 | Pixel width of road lines |
+| MAX_BUILDINGS_PER_CHUNK | 6 | Cap to prevent overcrowding |
+| BUILDING_MIN_DISTANCE | 200 | Minimum px between building centers |
+| BUILDING_ROAD_PROXIMITY | 150 | Max distance from road for town buildings |

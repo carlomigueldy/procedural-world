@@ -30,7 +30,7 @@ export class GameScene extends Phaser.Scene {
     this.uiCamera.setZoom(1);
 
     const generator = new TerrainGenerator(SEED);
-    this.chunkManager = new ChunkManager(this, generator, this.uiCamera);
+    this.chunkManager = new ChunkManager(this, generator, SEED, this.uiCamera);
     this.minimap = new Minimap(this, generator);
 
     this.player = new Player(this, 0, 0, characterId);
